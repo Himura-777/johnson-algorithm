@@ -1,8 +1,10 @@
 {
   "name": "johnson-algorithm",
   "version": "0.1.0",
+  "type": "module",
   "private": true,
   "dependencies": {
+    "@tailwindcss/postcss": "^4.1.1",
     "@testing-library/dom": "^10.4.0",
     "@testing-library/jest-dom": "^6.6.3",
     "@testing-library/react": "^16.3.0",
@@ -10,6 +12,7 @@
     "react": "^19.1.0",
     "react-dom": "^19.1.0",
     "react-scripts": "5.0.1",
+    "reactflow": "^11.11.4",
     "web-vitals": "^2.1.4"
   },
   "scripts": {
@@ -35,5 +38,13 @@
       "last 1 firefox version",
       "last 1 safari version"
     ]
+  },
+  "devDependencies": {
+    "@tailwindcss/postcss7-compat": "^2.2.17",
+    "autoprefixer": "^9.8.8",
+    "postcss": "^7.0.39",
+    "postcss-flexbugs-fixes": "^4.2.1",
+    "postcss-preset-env": "^6.7.0",
+    "tailwindcss": "npm:@tailwindcss/postcss7-compat@^2.2.17"
   }
 }
