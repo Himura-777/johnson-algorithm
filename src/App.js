@@ -1,33 +1,37 @@
-import React, {useState} from 'react'
-import GraphInput from './components/GraphInput.jsx'
-import GraphVisualization from './components/GraphVisualization.jsx'
-import ResultTable from './components/ResultTable.jsx'
-import StepByStep from './components/StepByStep.jsx'
-import Controls from './components/Controls.jsx'
-import {johnsonAlgorithm} from './algorithms/johnson.js'
+import React, { useState } from 'react';
+import GraphInput from './components/GraphInput.jsx';
+import Controls from './components/Controls.jsx';
+import ResultTable from './components/ResultTable.jsx';
+import { johnsonAlgorithm } from './algorithms/johnson.js';
 
 function App() {
   const [vertices, setVertices] = useState(['A', 'B', 'C']);
   const [edges, setEdges] = useState([
-    { source: 'A', target: 'B', weight: 2 },
-    { source: 'B', target: 'C', weight: -1 },
+
   ]);
   const [result, setResult] = useState(null);
-  const [currentStep, setCurrentStep] = useState(0);
-  const [steps, setSteps] = useState([]);
+  const [isLoading, setIsLoading] = useState(false);
+  const [error, setError] = useState(null);
 
   const runJohnson = () => {
-    const { result, steps } = johnsonAlgorithm(vertices, edges);
-    setResult(result);
-    setSteps(steps);
-    setCurrentStep(0);
+    setIsLoading(true);
+    setError(null);
+
+    try {
+      const result = johnsonAlgorithm(vertices, edges);
+      setResult(result);
+    } catch (err) {
+      setError(err.message);
+    } finally {
+      setIsLoading(false);
+    }
   };
 
   return (
       <div className="min-h-screen bg-gray-100 p-8">
         <h1 className="text-3xl font-bold mb-6">Алгоритм Джонсона</h1>
 
-        <div className="grid grid-cols-1 md:grid-cols-2 gap-8">
+        <div className="grid grid-cols-1 lg:grid-cols-2 gap-8">
           <div className="space-y-6">
             <GraphInput
                 vertices={vertices}
@@ -37,19 +41,15 @@ function App() {
             />
             <Controls
                 runAlgorithm={runJohnson}
-                currentStep={currentStep}
-                setCurrentStep={setCurrentStep}
-                maxStep={steps.length - 1}
+                isLoading={isLoading}
             />
           </div>
 
           <div className="space-y-6">
-            <GraphVisualization vertices={vertices} edges={edges} />
-            {steps.length > 0 && (
-                <StepByStep
-                    step={steps[currentStep]}
-                    vertices={vertices}
-                />
+            {error && (
+                <div className="bg-red-100 border-l-4 border-red-500 text-red-700 p-4">
+                  {error}
+                </div>
             )}
             {result && <ResultTable result={result} vertices={vertices} />}
           </div>

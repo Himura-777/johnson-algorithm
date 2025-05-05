@@ -1,18 +1,10 @@
 export const johnsonAlgorithm = (vertices, edges) => {
-	const steps = [];
-
 	// Шаг 1: Добавляем фиктивную вершину
 	const fakeVertex = "s";
 	const modifiedEdges = [
 		...edges,
 		...vertices.map(v => ({ source: fakeVertex, target: v, weight: 0 })),
 	];
-
-	steps.push({
-		name: "Добавление фиктивной вершины",
-		edges: modifiedEdges,
-		h: {},
-	});
 
 	// Шаг 2: Беллман-Форд для h(v)
 	const h = {};
@@ -30,34 +22,27 @@ export const johnsonAlgorithm = (vertices, edges) => {
 		if (!updated) break;
 	}
 
-	steps.push({
-		name: "Запуск Беллмана-Форда",
-		h: { ...h },
-	});
-
 	// Проверка на отрицательные циклы
-	const hasNegativeCycle = modifiedEdges.some(
-		({ source, target, weight }) => h[source] + weight < h[target]
-	);
-	if (hasNegativeCycle) throw new Error("Граф содержит отрицательный цикл!");
+	if (modifiedEdges.some(({ source, target, weight }) => h[source] + weight < h[target])) {
+		throw new Error("Граф содержит отрицательный цикл!");
+	}
 
 	// Шаг 3: Перевзвешивание рёбер
 	const reweightedEdges = edges.map(({ source, target, weight }) => ({
-		source,
-		target,
-		weight: weight + h[source] - h[target],
+		source, target, weight: weight + h[source] - h[target]
 	}));
-
-	steps.push({
-		name: "Перевзвешивание рёбер",
-		edges: reweightedEdges,
-	});
 
 	// Шаг 4: Дейкстра для каждой вершины
 	const distances = {};
+	const paths = {};
+
 	vertices.forEach(u => {
 		const dist = {};
-		vertices.forEach(v => dist[v] = Infinity);
+		const prev = {};
+		vertices.forEach(v => {
+			dist[v] = Infinity;
+			prev[v] = null;
+		});
 		dist[u] = 0;
 
 		const queue = [...vertices];
@@ -70,24 +55,34 @@ export const johnsonAlgorithm = (vertices, edges) => {
 				.forEach(({ target, weight }) => {
 					if (dist[current] + weight < dist[target]) {
 						dist[target] = dist[current] + weight;
+						prev[target] = current;
 					}
 				});
 		}
 
 		vertices.forEach(v => {
-			distances[`${u}-${v}`] = dist[v] - h[u] + h[v];
-		});
+			const key = `${u}-${v}`;
+			distances[key] = dist[v] === Infinity ? Infinity : dist[v] - h[u] + h[v];
 
-		steps.push({
-			name: `Дейкстра из вершины ${u}`,
-			dist: { ...dist },
+			// Восстановление пути
+			if (u !== v && dist[v] !== Infinity) {
+				const path = [];
+				let node = v;
+				while (node !== null) {
+					path.unshift(node);
+					node = prev[node];
+				}
+				paths[key] = path.join(' → ');
+			} else {
+				paths[key] = "нет пути";
+			}
 		});
 	});
 
-	// Формируем матрицу
-	const result = vertices.map(u =>
-		vertices.map(v => distances[`${u}-${v}`])
-	);
+	// Формируем матрицу расстояний
+	const matrix = vertices.map(u =>
+		vertices.map(v => distances[`${u}-${v}`] === Infinity ? '∞' : distances[`${u}-${v}`]
+		))
 
-	return { result, steps };
+	return { matrix, paths };
 };
