@@ -5,7 +5,7 @@ import ResultTable from './components/ResultTable.jsx';
 import { johnsonAlgorithm } from './algorithms/johnson.js';
 
 function App() {
-  const [vertices, setVertices] = useState(['A', 'B', 'C']);
+  const [vertices, setVertices] = useState([]);
   const [edges, setEdges] = useState([
 
   ]);
